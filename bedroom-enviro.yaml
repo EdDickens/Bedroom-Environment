@@ -1,0 +1,156 @@
+substitutions:
+  name: "bedroom-enviro"
+  friendly_name: bedroom-enviro
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: false
+  project:
+    name: esphome.web
+    version: '1.0'
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# esp32_ble_tracker:
+
+# Enable logging
+logger:
+    baud_rate: 0
+#---------------------------------------------------------------------------------------------------
+# Enable Home Assistant API
+api:
+  encryption: 
+    key: !secret haapi_key
+#---------------------------------------------------------------------------------------------------
+# Allow Over-The-Air updates
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# Allow provisioning Wi-Fi via serial
+# improv_serial:
+#---------------------------------------------------------------------------------------------------
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  manual_ip:
+    static_ip: 10.0.0.18
+    gateway: 10.0.0.1
+    subnet: 255.255.255.0
+    dns1: 75.75.75.75
+    dns2: 75.75.76.76
+  
+  fast_connect: off
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "bedroom-enviro"
+    password: "2012VolksBeet"
+#---------------------------------------------------------------------------------------------------
+captive_portal:
+#---------------------------------------------------------------------------------------------------
+dashboard_import:
+  package_import_url: github://esphome/example-configs/esphome-web/esp32.yaml@main
+  import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+# esp32_improv:
+#  authorizer: none
+
+# To have a "next url" for improv serial
+# web_server:
+#---------------------------------------------------------------------------------------------------
+switch:
+  - platform: restart
+    name: "Bedroom Enviro Restart"
+#---------------------------------------------------------------------------------------------------
+time:
+  - platform: homeassistant
+    id: esptime
+#---------------------------------------------------------------------------------------------------
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: Bedroom Enviro IP
+    ssid:
+      name: Bedroom Enviro SSID
+    mac_address:
+      name: Bedroom Enviro Mac
+#---------------------------------------------------------------------------------------------------
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+#---------------------------------------------------------------------------------------------------
+i2c:
+  - id: bus_a
+    sda: 21 # Yellow
+    scl: 22 # Green
+#---------------------------------------------------------------------------------------------------
+sensor:
+  - platform: wifi_signal
+    name: "Bedroom Enviro Signal Strength"
+    update_interval: 60s
+#-------------------------------------------------------
+  - platform: sds011
+    update_interval: 1min
+    pm_2_5:
+      name: "Bedroom Enviro PM <2.5µm"
+      id: MBRPM25
+    pm_10_0:
+      name: "Bedroom Enviro PM <10.0µm"
+      id: MBRPM100
+#-------------------------------------------------------
+  - platform: scd30
+    i2c_id: bus_a
+    co2:
+      name: "Bedroom Enviro CO2"
+      accuracy_decimals: 1
+    temperature:
+      name: "Bedroom Enviro Temperature"
+      unit_of_measurement: "°F"
+      state_class: measurement
+      device_class: temperature
+      accuracy_decimals: 1
+      filters: 
+        - lambda: return x * (9.0/5.0) + 32.0; # Convert C to F
+        - offset: -5
+    humidity:
+      name: "Bedroom Enviro Humidity"
+      accuracy_decimals: 1
+      unit_of_measurement: "%"
+      state_class: measurement
+      device_class: humidity
+    automatic_self_calibration: false
+    temperature_offset: 0.0 °C
+    altitude_compensation: 1945m
+    address: 0x61
+    update_interval: 60s
+#---------------------------------------------------------------------------------------------------
+# Example on how to implement a UI section in HA for manual calibration.
+# Note: Please enter first a CO2 value before pressing the button.
+button:
+  - platform: template
+    name: "Bedroom SCD30 Manual Cal"
+    entity_category: "config"
+    on_press:
+      then:
+        - scd30.force_recalibration_with_reference:
+            value: !lambda 'return id(co2_cal).state;'
+#---------------------------------------------------------------------------------------------------
+number:
+  - platform: template
+    name: "Bedroom CO2 Cal Value"
+    optimistic: true
+    min_value: 350
+    max_value: 4500
+    step: 1
+    id: co2_cal
+    icon: "mdi:molecule-co2"
+    entity_category: "config"
