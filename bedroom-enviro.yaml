@@ -38,12 +38,12 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
-  manual_ip:
-    static_ip: 10.0.0.18
-    gateway: 10.0.0.1
-    subnet: 255.255.255.0
-    dns1: 75.75.75.75
-    dns2: 75.75.76.76
+#  manual_ip:
+#    static_ip: 10.0.0.18
+#    gateway: 10.0.0.1
+#    subnet: 255.255.255.0
+#    dns1: 75.75.75.75
+#    dns2: 75.75.76.76
   
   fast_connect: off
 
@@ -120,7 +120,7 @@ sensor:
       accuracy_decimals: 1
       filters: 
         - lambda: return x * (9.0/5.0) + 32.0; # Convert C to F
-        - offset: -5
+        - offset: -5            
     humidity:
       name: "Bedroom Enviro Humidity"
       accuracy_decimals: 1
