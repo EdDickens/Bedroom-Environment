@@ -1,6 +1,6 @@
 substitutions:
   name: "bedroom-enviro"
-  friendly_name: bedroom-enviro
+  friendly_name: Bedroom Enviro
 #---------------------------------------------------------------------------------------------------
 esphome:
   name: ${name}
@@ -49,7 +49,7 @@ dashboard_import:
 #---------------------------------------------------------------------------------------------------
 switch:
   - platform: restart
-    name: "Bedroom Enviro Restart"
+    name: "${friendly_name} Restart"
 #---------------------------------------------------------------------------------------------------
 time:
   - platform: homeassistant
@@ -58,11 +58,13 @@ time:
 text_sensor:
   - platform: wifi_info
     ip_address:
-      name: Bedroom Enviro IP
+      name: ${friendly_name} IP
+      update_interval: 1h
     ssid:
-      name: Bedroom Enviro SSID
+      name: ${friendly_name} SSID
+      update_interval: 1h
     mac_address:
-      name: Bedroom Enviro Mac
+      name: ${friendly_name} Mac
 #---------------------------------------------------------------------------------------------------
 uart:
   rx_pin: GPIO3
@@ -76,25 +78,25 @@ i2c:
 #---------------------------------------------------------------------------------------------------
 sensor:
   - platform: wifi_signal
-    name: "Bedroom Enviro Signal Strength"
+    name: "${friendly_name} Signal Strength"
     update_interval: 60s
 #-------------------------------------------------------
   - platform: sds011
     update_interval: 1min
     pm_2_5:
-      name: "Bedroom Enviro PM <2.5µm"
+      name: "${friendly_name} PM <2.5µm"
       id: MBRPM25
     pm_10_0:
-      name: "Bedroom Enviro PM <10.0µm"
+      name: "${friendly_name} PM <10.0µm"
       id: MBRPM100
 #-------------------------------------------------------
   - platform: scd30
     i2c_id: bus_a
     co2:
-      name: "Bedroom Enviro CO2"
+      name: "${friendly_name} CO2"
       accuracy_decimals: 1
     temperature:
-      name: "Bedroom Enviro Temperature"
+      name: "${friendly_name} Temperature"
       unit_of_measurement: "°F"
       state_class: measurement
       device_class: temperature
@@ -103,7 +105,7 @@ sensor:
         - lambda: return x * (9.0/5.0) + 32.0; # Convert C to F
         - offset: -5            
     humidity:
-      name: "Bedroom Enviro Humidity"
+      name: "${friendly_name} Humidity"
       accuracy_decimals: 1
       unit_of_measurement: "%"
       state_class: measurement
